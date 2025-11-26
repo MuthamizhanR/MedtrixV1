@@ -1,0 +1,279 @@
+/* --- MEDTRIX PRO THEME (Unified Blue) --- */
+:root {
+    /* LIGHT MODE */
+    --bg-body: #f4f7f6;
+    --bg-grad: linear-gradient(135deg, #f4f7f6 0%, #eef2f3 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    
+    --text-main: #1f2937;
+    --text-sub: #6b7280;
+    
+    /* The "Medtrix Blue" */
+    --accent: #007bff; 
+    --accent-light: rgba(0, 123, 255, 0.1);
+    --accent-grad: linear-gradient(135deg, #007bff, #0056b3);
+    
+    --success: #10b981; 
+    --danger: #ef4444; 
+    --radius: 16px;
+}
+
+[data-theme="dark"] {
+    /* DARK MODE (Deep Blue/Grey - No Neon) */
+    --bg-body: #0b0f19;
+    --bg-grad: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+    --glass-bg: rgba(31, 41, 55, 0.85);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    
+    --text-main: #f9fafb;
+    --text-sub: #9ca3af;
+    
+    /* Professional Lighter Blue for Dark Mode (Readable) */
+    --accent: #3b82f6; 
+    --accent-light: rgba(59, 130, 246, 0.15);
+    --accent-grad: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-body); background-image: var(--bg-grad);
+    background-attachment: fixed; color: var(--text-main);
+    min-height: 100vh; padding: 20px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* --- SEARCH BAR FIX --- */
+.search-wrapper { max-width: 600px; margin: 25px auto 0; position: relative; }
+
+.search-wrapper input {
+    width: 100%; padding: 16px 20px 16px 50px;
+    border-radius: 50px; 
+    border: 2px solid transparent; /* Better visibility focus state */
+    background: var(--glass-bg); 
+    
+    /* FORCE TEXT COLOR TO BE VISIBLE */
+    color: var(--text-main); 
+    caret-color: var(--accent); /* Cursor color */
+    
+    backdrop-filter: blur(10px); outline: none; font-size: 1rem; font-weight: 500;
+    box-shadow: var(--glass-shadow); transition: 0.3s;
+}
+
+/* Specific fix for Dark Mode input text */
+[data-theme="dark"] .search-wrapper input {
+    background: rgba(31, 41, 55, 0.95);
+    color: #ffffff;
+}
+
+.search-wrapper input:focus { 
+    border-color: var(--accent); 
+    box-shadow: 0 0 0 4px var(--accent-light); 
+}
+
+.search-wrapper i { 
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%); 
+    color: var(--text-sub); pointer-events: none;
+}
+
+/* --- HEADER --- */
+header { text-align: center; margin-bottom: 40px; }
+h1 { 
+    font-family: 'Orbitron', sans-serif; font-size: 2rem; margin: 10px 0; 
+    background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.version-tag { 
+    font-size: 0.5em; opacity: 0.8; letter-spacing: 2px; 
+    color: var(--text-sub); -webkit-text-fill-color: var(--text-sub); 
+}
+
+.logo-box {
+    width: 64px; height: 64px; margin: 0 auto;
+    background: var(--glass-bg); border-radius: 20px; 
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--accent); border: var(--glass-border);
+    box-shadow: var(--glass-shadow); cursor: pointer; transition: 0.3s;
+}
+.logo-box:hover { transform: scale(1.05); box-shadow: 0 10px 40px rgba(0, 123, 255, 0.2); }
+
+/* --- GRID SYSTEM (Subject Tiles) --- */
+.grid-view { 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+    gap: 20px; max-width: 1000px; margin: 0 auto 80px; 
+}
+
+.card {
+    background: var(--glass-bg); border: var(--glass-border);
+    border-radius: var(--radius); padding: 25px 15px;
+    text-align: center; cursor: pointer;
+    box-shadow: var(--glass-shadow); transition: 0.3s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;
+    position: relative; overflow: hidden;
+    min-height: 160px;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--accent); }
+
+/* Icon Styling */
+.card i { 
+    font-size: 2.5rem; 
+    color: var(--text-sub); /* Default to subtle grey */
+    transition: 0.3s; 
+    background: var(--accent-light);
+    width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+}
+.card:hover i { 
+    color: #fff; background: var(--accent); transform: scale(1.1); 
+}
+
+.card h3 { font-size: 0.95rem; font-weight: 600; margin: 0; color: var(--text-main); }
+
+/* --- LIST VIEW --- */
+.list-view { display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; }
+.list-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--glass-bg); padding: 20px; border-radius: 15px;
+    border: var(--glass-border); cursor: pointer; transition: 0.2s;
+}
+.list-item:hover { background: var(--accent-light); border-color: var(--accent); }
+.badge { background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
+
+/* --- QUIZ UI --- */
+.quiz-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; font-family: 'Orbitron'; color: var(--text-sub);
+}
+
+.q-box {
+    background: var(--glass-bg); border: var(--glass-border);
+    border-radius: var(--radius); padding: 30px;
+    box-shadow: var(--glass-shadow); margin-bottom: 100px;
+    backdrop-filter: blur(15px);
+}
+.q-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6; }
+/* Container: Holds the pieces together */
+.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0;                /* CRITICAL: No space between slices */
+    margin: 15px auto;     /* Center the whole block */
+    max-width: 100%;       /* fits container */
+    
+    /* Put the border radius on the CONTAINER, not the images */
+    border-radius: 8px;    
+    overflow: hidden;      /* Clips the corners of the images */
+    border: 1px solid #333;
+}
+
+/* Container: Forces images into a single horizontal row */
+.image-grid {
+    display: flex;
+    flex-flow: row nowrap; /* CRITICAL: Prevent wrapping to next line */
+    justify-content: center;
+    align-items: stretch;  /* Makes height uniform if slices differ slightly */
+    gap: 0;                /* Seamless stitching */
+    margin: 15px auto;
+    width: fit-content;    /* Only take up needed space */
+    max-width: 100%;       /* Ensure it fits in the phone screen */
+    
+    /* Outer styling */
+    border-radius: 8px;
+    overflow: hidden;      /* Clips corners for the whole group */
+    border: 1px solid #333;
+}
+
+/* --- REVERTED IMAGE LAYOUT --- */
+
+/* 1. Reset the container to just be a simple centered box */
+.image-container {
+    text-align: center;
+    margin-bottom: 20px;
+    display: block; /* Removes flex/grid behavior */
+}
+
+/* 2. The Original Image Style (from your snippet) */
+.q-img { 
+    max-width: 100%; 
+    border-radius: 12px; 
+    border: 1px solid var(--glass-border); 
+    cursor: zoom-in;
+    
+    /* Optional: Adds space if you have multiple images stacked */
+    margin: 5px; 
+    display: inline-block; 
+}
+.option {
+    padding: 18px; border: 2px solid transparent; border-radius: 14px;
+    cursor: pointer; transition: 0.2s; margin-bottom: 12px;
+    background: rgba(0,0,0,0.03); display: flex; gap: 15px; font-weight: 500;
+    color: var(--text-main);
+}
+[data-theme="dark"] .option { background: rgba(255,255,255,0.05); }
+
+.option:hover { border-color: var(--accent); background: var(--accent-light); }
+
+.option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.option.wrong { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.option.disabled { pointer-events: none; opacity: 0.7; }
+
+/* In your CSS file */
+.explanation-section {
+  display: none; /* Hidden by default */
+  
+  /* Keep your other styling below */
+  background-color: #1a2b3c;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+/* Add this class to show it later */
+.explanation-section.visible {
+  display: block; /* Becomes visible when this class is added */
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* --- FOOTER & MISC --- */
+.footer-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 90%; max-width: 500px; background: var(--glass-bg);
+    padding: 10px; border-radius: 40px; border: var(--glass-border);
+    display: flex; gap: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    backdrop-filter: blur(20px); z-index: 50;
+}
+.btn { flex: 1; padding: 12px; border-radius: 30px; border: none; font-weight: 700; cursor: pointer; }
+.btn-nav { background: transparent; color: var(--text-main); }
+.btn-action { background: var(--accent); color: #fff; box-shadow: 0 4px 15px var(--accent-light); }
+
+/* --- BUTTONS --- */
+.medtrix-home-btn {
+    /* Position & Shared Styles */
+    position: absolute; 
+    top: 20px; 
+    left: 20px; 
+    z-index: 100;
+    
+    background: var(--glass-bg); 
+    border: 1px solid var(--glass-border); /* Fixed syntax: added '1px solid' */
+    color: var(--text-main); 
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(10px); 
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+
+    /* Specific Sizing (Compact Version) */
+    padding: 4px 12px; 
+    border-radius: 15px; 
+    font-size: 12px; 
+    font-weight: 600; 
+    gap: 4px; 
+    text-decoration: none; 
+}
+.hidden { display: none !important; }

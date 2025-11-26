@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MEDTRIX | Q-Bank Pro</title>
+    <!-- 1. Key loads first -->
+<script src="config.js"></script> 
+
+<!-- 2. Engine loads second, using the key -->
+<script src="medtrix_core.js"></script>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+     
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- PREMIUM THEME VARIABLES --- */
+        :root {
+            --bg-body: #f0f4f8;
+            --bg-gradient: radial-gradient(circle at top left, #e0f7fa, #f0f4f8);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
+            --text-main: #1a202c;
+            --text-sub: #4a5568;
+            --accent: #007bff;
+            --success: #10b981; --danger: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f1115;
+            --bg-gradient: radial-gradient(circle at top center, #1a202c, #0f1115);
+            --glass-bg: rgba(20, 22, 27, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --text-main: #f7fafc;
+            --text-sub: #a0aec0;
+            --accent: #00e5ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; transition: background 0.3s ease, color 0.3s ease; }
+        
+        body { 
+            background: var(--bg-body); background-image: var(--bg-gradient);
+            background-attachment: fixed; color: var(--text-main);
+            min-height: 100vh; overflow: hidden; 
+        }
+
+        /* --- HEADER --- */
+        header { 
+            height: 60px; background: var(--glass-bg); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; z-index: 50; position: fixed; top: 0; width: 100%;
+        }
+        .brand { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .brand span { font-family: 'Poppins', sans-serif; font-weight: 400; font-size: 0.8rem; opacity: 0.7; }
+
+        /* --- DASHBOARD VIEW --- */
+        #view-dashboard { 
+            padding: 80px 20px 20px; height: 100vh; overflow-y: auto; 
+            max-width: 1000px; margin: 0 auto;
+        }
+
+        .search-wrapper { position: relative; margin-bottom: 20px; }
+        .search-bar { 
+            width: 100%; padding: 14px 20px 14px 45px; border-radius: 12px; 
+            border: 1px solid var(--glass-border); background: var(--glass-bg); 
+            color: var(--text-main); font-size: 1rem; outline: none; 
+            box-shadow: var(--glass-shadow); transition: 0.2s;
+        }
+        .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 123, 255, 0.2); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-sub); }
+
+        /* Accordion Groups */
+        .category-group { 
+            margin-bottom: 15px; background: var(--glass-bg); 
+            border: 1px solid var(--glass-border); border-radius: 16px; 
+            overflow: hidden; box-shadow: var(--glass-shadow); transition: 0.2s;
+        }
+        .group-header { 
+            padding: 18px 20px; cursor: pointer; font-weight: 600; font-size: 1rem; 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.02);
+        }
+        .group-header:hover { background: rgba(0, 229, 255, 0.05); }
+        
+        .group-count { background: var(--accent); color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
+        
+        .test-list { display: none; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.02); }
+        .category-group.open .test-list { display: block; }
+        
+        .test-item { 
+            padding: 15px 20px; border-bottom: 1px solid var(--glass-border); 
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center; 
+            font-size: 0.9rem; transition: 0.2s;
+        }
+        .test-item:last-child { border-bottom: none; }
+        .test-item:hover { padding-left: 25px; color: var(--accent); background: rgba(0, 229, 255, 0.05); }
+
+        /* --- QUIZ VIEW (Overlay) --- */
+        #view-quiz { 
+            position: fixed; inset: 0; background: var(--bg-body); 
+            z-index: 100; display: flex; flex-direction: column; 
+            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overscroll-behavior: none; /* Prevents swipe-to-back on mobile browsers */
+            width: 100vw; height: 100dvh; /* Ensure full viewport */
+        }
+        #view-quiz.active { transform: translateX(0); }
+
+        .quiz-header { 
+            height: 60px; background: var(--glass-bg); border-bottom: 1px solid var(--glass-border); 
+            display: flex; align-items: center; padding: 0 15px; gap: 15px; backdrop-filter: blur(15px);
+            flex-shrink: 0;
+        }
+        .back-btn { 
+            background: rgba(0,0,0,0.05); border: none; font-weight: 600; cursor: pointer; 
+            color: var(--text-main); display: flex; align-items: center; gap: 8px; 
+            padding: 8px 15px; border-radius: 20px; transition: 0.2s;
+        }
+        .back-btn:hover { background: var(--accent); color: white; }
+        .quiz-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; text-align: center; font-size: 0.9rem; opacity: 0.8; }
+
+        /* Quiz Content */
+        .quiz-content { 
+            flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; 
+            overscroll-behavior-y: contain; /* Smart Scroll */
+            overflow-x: hidden; /* FIX: Prevents page-wide horizontal scroll */
+            width: 100%;
+        }
+        .q-card { 
+            max-width: 800px; margin: 0 auto; background: var(--glass-bg); 
+            padding: 30px; border-radius: 20px; border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow); backdrop-filter: blur(10px);
+            width: 100%; /* Ensure it fits in parent */
+        }
+        
+        .q-meta-row { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: center; }
+        .q-badge { 
+            background: var(--accent); color: white; padding: 5px 15px; 
+            border-radius: 15px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;
+        }
+        .id-display { 
+            font-family: 'Orbitron', sans-serif; color: var(--text-sub); font-size: 0.75rem; opacity: 0.7; 
+        }
+
+        .q-text { font-size: 1.1rem; font-weight: 600; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
+        
+        /* Media */
+        .q-img { display: block; max-width: 100%; border-radius: 10px; margin: 15px auto; border: 1px solid var(--glass-border); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .q-video { width: 100%; border-radius: 10px; margin-top: 10px; background: black; max-height: 400px; }
+
+        /* Options */
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .opt-btn { 
+            text-align: left; padding: 18px 20px; background: rgba(0,0,0,0.02); 
+            border: 2px solid var(--glass-border); border-radius: 12px; 
+            font-size: 1rem; color: var(--text-main); cursor: pointer; 
+            display: flex; gap: 15px; align-items: flex-start; transition: all 0.2s; 
+        }
+        .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0, 229, 255, 0.05); }
+        .opt-char { flex-shrink: 0; font-weight: bold; width: 25px; color: var(--accent); }
+
+        .opt-btn.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .opt-btn.wrong { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+        /* Explanation */
+        .exp-section { margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 25px; display: none; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .exp-section.show { display: block; }
+        
+        .exp-title { 
+            font-weight: 800; color: var(--accent); margin-bottom: 15px; font-family: 'Orbitron', sans-serif;
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        
+        /* FIX: Explanation Content Scrolling */
+        .exp-content { 
+            font-size: 0.95rem; 
+            line-height: 1.7; 
+            color: var(--text-main); 
+            opacity: 0.9; 
+            white-space: pre-wrap; 
+            /* Added for scrolling: */
+            overflow-x: auto; 
+            max-width: 100%; 
+            display: block;
+        }
+        /* Fix for markdown tables if they exist inside exp-content */
+        .exp-content table { display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; }
+        .exp-content th, .exp-content td { padding: 8px; border: 1px solid var(--glass-border); }
+        
+        /* Footer Controls */
+        .quiz-footer { 
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px; 
+            background: var(--glass-bg); border-top: 1px solid var(--glass-border); 
+            backdrop-filter: blur(15px);
+            display: flex; padding: 10px 20px; gap: 15px; z-index: 101; 
+            justify-content: center; align-items: center;
+        }
+        .nav-btn { 
+            flex: 1; max-width: 200px; height: 50px; border-radius: 15px; 
+            font-weight: 600; border: none; cursor: pointer; font-size: 1rem; transition: transform 0.1s;
+        }
+        .nav-btn:active { transform: scale(0.95); }
+        .btn-prev { background: transparent; color: var(--text-main); border: 2px solid var(--glass-border); }
+        .btn-next { background: var(--accent); color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Mobile Tweaks */
+        @media (max-width: 600px) {
+            .quiz-title { font-size: 0.8rem; }
+            .q-card { padding: 20px; }
+            .opt-btn { padding: 15px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="brand">
+        <i class="fas fa-dna"></i> MEDTRIX <span>Archive</span>
+    </a>
+</header>
+
+<!-- DASHBOARD -->
+<div id="view-dashboard">
+    <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search" class="search-bar" placeholder="Search topics (e.g. Neuro, Cardio, DAMS)..." onkeyup="filterIndex()">
+    </div>
+    <div id="index-container"></div>
+</div>
+
+<!-- QUIZ OVERLAY -->
+<div id="view-quiz">
+    <div class="quiz-header">
+        <button class="back-btn" onclick="closeQuiz()"><i class="fas fa-arrow-left"></i> Back</button>
+        <div class="quiz-title" id="q-title">Loading...</div>
+        <div style="width: 60px;"></div>
+    </div>
+    
+    <div class="quiz-content" id="quiz-scroll-area">
+        <div class="q-card">
+            <div class="q-meta-row">
+                <span class="q-badge" id="q-num">1 / 10</span>
+                <div>
+                    <span id="q-id-disp" class="id-display"></span>
+                    <i class="fas fa-link" onclick="copyLink()" style="cursor:pointer; margin-left:10px; opacity:0.6;"></i>
+                </div>
+            </div>
+
+            <div class="q-text" id="q-text"></div>
+            <div id="q-media-question"></div>
+            <div class="options" id="q-options"></div>
+
+            <div class="exp-section" id="q-exp">
+                <div class="exp-title">
+                    EXPLANATION
+                </div>
+                <div class="exp-content" id="exp-text"></div>
+                <div id="exp-media-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quiz-footer">
+        <button class="nav-btn btn-prev" id="btn-prev" onclick="move(-1)">Previous</button>
+        <button class="nav-btn btn-next" id="btn-next" onclick="move(1)">Next</button>
+    </div>
+    
+</div>
+
+<script>
+    // --- THEME INIT ---
+    if(localStorage.getItem('medtrix-theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    // --- STATE ---
+    let manifest = [];
+    let currentTest = null;
+    let curIdx = 0;
+    let currentFilename = "";
+    
+    // --- GESTURE STATE ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    // --- LOAD DATA ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Fetch from Core (Fast & Pre-Categorized)
+        manifest = await MEDTRIX.data.getManifest();
+        
+        if (!manifest || manifest.length === 0) {
+            document.getElementById('index-container').innerHTML = '<div style="text-align:center; opacity:0.6; padding:40px;">No Q-Banks found.<br>Run python script.</div>';
+            return;
+        }
+        renderIndex(manifest);
+    });
+
+    // --- GESTURES (With Scroll Lock) ---
+    const quizArea = document.getElementById('view-quiz');
+    quizArea.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; });
+    quizArea.addEventListener('touchend', e => {
+        const diffX = e.changedTouches[0].screenX - touchStartX;
+        const diffY = e.changedTouches[0].screenY - touchStartY;
+        // Only swipe if horizontal movement > vertical (user isn't reading down)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX < 0) move(1); else move(-1);
+        }
+    });
+
+    // --- RENDER DASHBOARD ---
+    function renderIndex(list) {
+        const container = document.getElementById('index-container');
+        container.innerHTML = "";
+        
+        // Group by Category (from Python)
+        const groups = list.reduce((acc, item) => {
+            const cat = item.category || "Uncategorized";
+            if(!acc[cat]) acc[cat] = [];
+            acc[cat].push(item);
+            return acc;
+        }, {});
+
+        Object.keys(groups).sort().forEach((cat) => {
+            const itemsHtml = groups[cat].map(t => `
+                <div class="test-item" onclick="openTest('${t.file}')">
+                    <span>${t.title}</span>
+                    <span style="font-size:0.75rem; opacity:0.6; font-family:'Orbitron'">${t.count || '?'} Qs</span>
+                </div>
+            `).join('');
+
+            container.innerHTML += `
+                <div class="category-group">
+                    <div class="group-header" onclick="this.parentElement.classList.toggle('open')">
+                        <div><i class="fas fa-folder" style="margin-right:10px; color:var(--accent);"></i> ${cat}</div>
+                        <span class="group-count">${groups[cat].length}</span>
+                    </div>
+                    <div class="test-list">${itemsHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function filterIndex() {
+        const term = document.getElementById('search').value.toLowerCase();
+        if(!term) { renderIndex(manifest); return; }
+        const filtered = manifest.filter(t => t.title.toLowerCase().includes(term));
+        renderIndex(filtered);
+        document.querySelectorAll('.category-group').forEach(g => g.classList.add('open'));
+    }
+
+    // --- QUIZ ENGINE ---
+    async function openTest(filename, qId = null) {
+        currentTest = await MEDTRIX.data.getQuiz(filename);
+        if(!currentTest) return alert("Could not load this Q-Bank.");
+        
+        currentFilename = filename;
+        curIdx = 0;
+        
+        // Restore position
+        if (!qId) {
+            const savedPos = localStorage.getItem('pos_' + filename);
+            if (savedPos) curIdx = parseInt(savedPos);
+        } else {
+            const found = currentTest.questions.findIndex(q => q.uid === qId);
+            if(found !== -1) curIdx = found;
+        }
+
+        // Use Pre-Calculated Title
+        const itemMeta = manifest.find(m => m.file === filename);
+        document.getElementById('q-title').textContent = itemMeta ? itemMeta.title : filename;
+        
+        document.getElementById('view-quiz').classList.add('active');
+        renderQuestion();
+    }
+
+    function closeQuiz() {
+        document.getElementById('view-quiz').classList.remove('active');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    function renderQuestion() {
+        const q = currentTest.questions[curIdx];
+        localStorage.setItem('pos_' + currentFilename, curIdx);
+
+        document.getElementById('q-num').textContent = `${curIdx + 1} / ${currentTest.questions.length}`;
+        document.getElementById('q-id-disp').textContent = `#${q.uid || 'ID'}`;
+        document.getElementById('q-text').innerHTML = q.text;
+
+        // Media
+        const qMediaDiv = document.getElementById('q-media-question');
+        qMediaDiv.innerHTML = '';
+        if(q.question_images) {
+            q.question_images.forEach(src => {
+                qMediaDiv.innerHTML += `<img src="${src}" class="q-img">`;
+            });
+        }
+
+        // Options
+        const optsDiv = document.getElementById('q-options');
+        optsDiv.innerHTML = q.options.map((opt, i) => `
+            <button class="opt-btn" onclick="checkAns(this, ${opt.correct})">
+                <div class="opt-char">${String.fromCharCode(65+i)}</div>
+                <div style="flex:1">${opt.text}</div>
+            </button>
+        `).join('');
+
+        // Reset State
+        document.getElementById('q-exp').classList.remove('show');
+        
+        // Parse Explanation
+        const expMediaDiv = document.getElementById('exp-media-container');
+        expMediaDiv.innerHTML = '';
+
+        let expText = q.explanation || "No explanation provided.";
+        expText = expText.replace(/(https?:\/\/\S+\.(?:mp4|m3u8|mp3))/gi, (match) => {
+            const id = 'media-' + Math.random().toString(36).substr(2, 9);
+            setTimeout(() => initVideo(id, match), 100);
+            return `<div style="margin-top:15px"><video id="${id}" controls class="q-video"></video></div>`;
+        });
+        document.getElementById('exp-text').innerHTML = expText;
+
+        if(q.explanation_images) q.explanation_images.forEach(src => expMediaDiv.innerHTML += `<img src="${src}" class="q-img">`);
+
+        // Nav State
+        document.getElementById('btn-prev').disabled = curIdx === 0;
+        document.getElementById('btn-next').textContent = curIdx === currentTest.questions.length - 1 ? "Finish" : "Next";
+        document.getElementById('quiz-scroll-area').scrollTop = 0;
+    }
+
+    function checkAns(btn, isCorrect) {
+        const all = document.querySelectorAll('.opt-btn');
+        all.forEach(b => b.disabled = true);
+
+        if(isCorrect) btn.classList.add('correct');
+        else {
+            btn.classList.add('wrong');
+            const q = currentTest.questions[curIdx];
+            const correctIndex = q.options.findIndex(o => o.correct);
+            if(correctIndex !== -1) all[correctIndex].classList.add('correct');
+        }
+        
+        document.getElementById('q-exp').classList.add('show');
+        MEDTRIX.db.saveResult(currentTest.questions[curIdx], isCorrect, currentFilename);
+        
+        // Auto Scroll on Mobile
+        if(window.innerWidth < 768) setTimeout(() => document.getElementById('q-exp').scrollIntoView({behavior:'smooth'}), 200);
+    }
+
+    function move(dir) {
+        const next = curIdx + dir;
+        if(next >= 0 && next < currentTest.questions.length) {
+            curIdx = next;
+            renderQuestion();
+        } else if (next >= currentTest.questions.length) closeQuiz();
+    }
+
+    function initVideo(id, src) {
+        const vid = document.getElementById(id);
+        if(!vid) return;
+        if(src.includes('.m3u8') && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(vid);
+        } else { vid.src = src; }
+    }
+
+    function copyLink() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('test', currentFilename);
+        url.searchParams.set('q', currentTest.questions[curIdx].uid);
+        navigator.clipboard.writeText(url.toString());
+        MEDTRIX.ui.toast("Link Copied!");
+    }
+</script>
+
+</body>
+</html>
