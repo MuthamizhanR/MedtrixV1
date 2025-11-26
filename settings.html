@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MEDTRIX | Settings</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Specific Styles for Settings Page */
+        .settings-container { max-width: 700px; margin: 0 auto; padding-top: 50px; }
+        .setting-card { 
+            background: var(--surface); border: var(--border); border-radius: 20px; 
+            padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow);
+            display: flex; justify-content: space-between; align-items: center; 
+            min-height: 80px; transition: transform 0.2s, border-color 0.2s;
+        }
+        .setting-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+        .setting-info { flex-grow: 1; margin-right: 20px; }
+        .setting-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; color: var(--text); }
+        .setting-desc { font-size: 0.8rem; opacity: 0.6; color: var(--text-sub); }
+
+        .action-button {
+            padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer;
+            border: none; transition: 0.2s; min-height: 44px; /* Touch target */
+        }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-danger:hover { background: #d33838; }
+        .btn-update { background: var(--accent); color: white; }
+        .btn-update:hover { background: #0069d9; }
+
+        /* HEADER SPACING */
+        header { padding-top: 20px; margin-top: 0; }
+        h1 { font-size: 1.8rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="medtrix-home-btn" style="position:absolute; top:20px; left:20px;">
+            <i class="fas fa-arrow-left"></i> <span>Dashboard</span>
+        </a>
+        <h1>Settings</h1>
+        <p class="version-tag">Configuration</p>
+    </header>
+
+    <div class="settings-container">
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <div class="setting-title"><i class="fa-solid fa-moon"></i> Theme Toggle</div>
+                <div class="setting-desc">Currently: <span id="theme-status">Dark</span>. Switch between light and dark themes.</div>
+            </div>
+            <button class="action-button btn-update" onclick="toggleTheme()">
+                <i class="fa-solid fa-lightbulb"></i> Change
+            </button>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <div class="setting-title"><i class="fa-solid fa-cloud-arrow-down"></i> Force Content Update</div>
+                <div class="setting-desc">Downloads the latest quiz data and fixes from the server (Bypasses cache).</div>
+            </div>
+            <button class="action-button btn-update" onclick="forceUpdate()">
+                <i class="fa-solid fa-rotate"></i> Update Now
+            </button>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <div class="setting-title"><i class="fas fa-trash-can"></i> Factory Reset</div>
+                <div class="setting-desc">**WARNING:** Clears all saved progress, history, and bookmarks.</div>
+            </div>
+            <button class="action-button btn-danger" onclick="hardReset()">
+                <i class="fas fa-times"></i> Clear Data
+            </button>
+        </div>
+
+    </div>
+    
+    <script>
+        // 1. Core Functions (Self-contained)
+        
+        function hardReset() {
+            if(confirm("⚠️ FACTORY RESET\\n\\nThis will delete ALL progress, history, and bookmarks.\\nAre you sure?")) {
+                localStorage.clear();
+                alert("System Reset Complete. Refreshing...");
+                location.reload();
+            }
+        }
+        
+        function forceUpdate() {
+            if(confirm("Force Update: This will restart the app and ensure all new files/data are downloaded. Continue?")) {
+                // true parameter forces a reload that bypasses the cache
+                location.reload(true); 
+            }
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('medtrix-theme', next);
+            updateThemeStatus(next);
+        }
+
+        function updateThemeStatus(theme) {
+            const statusEl = document.getElementById('theme-status');
+            if(statusEl) statusEl.innerText = theme.charAt(0).toUpperCase() + theme.slice(1);
+        }
+
+        // 2. Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('medtrix-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeStatus(savedTheme);
+        });
+    </script>
+</body>
+</html>
